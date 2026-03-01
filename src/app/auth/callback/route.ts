@@ -15,7 +15,8 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser()
 
-      if (user?.email !== process.env.ALLOWED_EMAIL) {
+      const allowedEmails = (process.env.ALLOWED_EMAIL ?? '').split(',').map(e => e.trim())
+      if (!user?.email || !allowedEmails.includes(user.email)) {
         await supabase.auth.signOut()
         return NextResponse.redirect(
           `${origin}/login?error=unauthorized`

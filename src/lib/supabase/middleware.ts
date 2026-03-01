@@ -50,7 +50,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Authenticated but wrong email → sign out and redirect to login
-  if (user && user.email !== process.env.ALLOWED_EMAIL) {
+  const allowedEmails = (process.env.ALLOWED_EMAIL ?? '').split(',').map(e => e.trim())
+  if (user && (!user.email || !allowedEmails.includes(user.email))) {
     await supabase.auth.signOut()
     const url = request.nextUrl.clone()
     url.pathname = '/login'
